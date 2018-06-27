@@ -1,0 +1,78 @@
+#1. Alogrithom
+
+编写一个程序，删除每个输入行末尾的空格与制表符，并删除完全是空格的行
+  这是《C程序设计语言》（第2版）的1-18题。
+  
+
+        #include<stdio.h>  
+        #define MAXSIZE 1000  
+        #define MAXLINE 100  
+
+        int getLine(char line[] , int length);  
+        void copy(char to[],char from[],int length);  
+        int main(){  
+            int length,i;  
+            i = 0;  
+            length = 0;  
+            char line[MAXSIZE];  
+            char lineout[MAXLINE][MAXSIZE];  
+
+            while((length = getLine(line,MAXSIZE))>0)  
+               {  
+                    if(line[length-1]=='\n')  
+                        length--;  
+                    while((line[length-1]==' '||line[length-1]=='\t')&&length>0)  
+                        length--;  
+                    if(length>0)  
+                    {  
+                        copy(lineout[i],line,length);  
+                        //printf("i=%d,%s\n",i,lineout[i]);  
+                        i++;  
+                    }  
+
+
+                }  
+            for(int j=0;j<i;j++){  
+                printf("j=%d,%s\n",j,lineout[j]);  
+            }  
+            return 0;  
+        }  
+
+
+        int getLine(char line[] , int length){  
+            int i,c;  
+            for(i=0;i<length&&(c=getchar()) != EOF &&c!='\n';i++)  
+                line[i]=c;  
+            if(c=='\n')  
+                line[i++]=c;  
+            line[i]='\0';  
+            return i;  
+        }  
+
+        void copy(char to[],char from[],int length){  
+            int i;  
+            while((to[i]=from[i]) != '\n'&&i<length)  
+                i++;  
+            if(length<MAXSIZE-1)  
+                to[i++]='\n';  
+            to[i]='\0';  
+        }  
+
+自己实现了一个getLine按行读取的函数（题目要求），和一个copy函数。
+getLine函数实现将输入的字符按行保存到line[]数组，长度不超过length。
+copy函数实现从from到to字符数组的拷贝，拷贝长度为0-length。
+
+首先，为什么没有在19行的while循环里直接输出结果。因为在windows上，用的codeblocks10.05版本，如果在while((c=getchar)!=EOF)的循环体内，
+如果有getchar或者printf输出，则在命令行输入时，不能整段文本处理，会按行显示出处理结果，即一行输入，一行对本行的处理。所以在while循环内，
+我将每行line[]保存到一个二位字符数组line[][]中，在34行的for循环中将其打印出来。但是mac上，用codeblocks13.12并没有出现这种按行处理的结果。
+（后续会查资料考证一下是codeblocks版本的原因，还是不同操作系统的编译执行不同，或者是不同系统的终端命令行工具导致的）
+
+
+在调试时发现，34行的for循环中并不能按要求输出结果。只保存了第一行line[0],其他行均为空，调试时在第28行while循环内部加了一个打印语句，
+结果发现加上这条打印语句，for循环输出正常，注释掉，则for循环输出异常。最后发现原来是copy函数中，没有对i初始化为0（第52行），初始化之后输出正常。
+没有初始化，不是应该任意分配一个数值吗？为什么加一行输出之后结果正确。（后续也将考证这一点）
+
+
+看了《C程序设计语言》习题解答中的答案，发现它的程序，将所有对空格，制表符的处理放在了一个remove行数中。这更符合c函数对功能的抽象。
+是以后在编程时需要注意模仿的。
+
